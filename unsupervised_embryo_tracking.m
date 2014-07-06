@@ -19,16 +19,6 @@ if genFigures
     title(sprintf('%.2f pi', rotation(i)/pi))
   end
 end
-  
-  %for i = 1:m
-  %  for j = 1:m
-  %    if i*j <= nPatches
-  %      subplot(m,m,(i-1)*m+j);
-  %      show_patch(gabor{(i-1)*m+j});
-  %    end
-  %  end
-  %end
-%end
 
 % Load one image for now.
 % TODO: Load all the images
