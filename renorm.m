@@ -1,4 +1,6 @@
 function y = renorm(x, low, high)
+% function y = renorm(x, low, high)
+%
 % Normalize x to occupy the span [low, high].  If span not provided, assume
 % [0, 1].
 
