@@ -9,12 +9,13 @@ rotation =  0:pi/nPatches:pi-pi/nPatches;
 gaborPatch = @(r) gabor_patch(3, r, 3*pi, 0, 1);
 gabor = arrayfun(gaborPatch, rotation, 'UniformOutput', false);
 
+% If debugging, show gabor patches
 if genFigures
   figure('name', 'Gabor Patches');
   m = ceil(sqrt(nPatches));
   for i = 1:nPatches;
     subplot(m, m, i)
-    show_patch(gabor{i});
+    imshow(uint8(renorm(gabor{i}, 0, 255)));
     title(sprintf('%.2f pi', rotation(i)/pi))
   end
 end
@@ -38,12 +39,13 @@ grad = gradient(image);
 conv2fun = @(gb) conv2(grad, gb, 'same');
 filtGrad = cellfun(conv2fun, gabor, 'UniformOutput', false);
 
+% If debugging, show result of convolution
 if genFigures
   figure('name', 'Filtered Gradient');
   m = ceil(sqrt(nPatches));
   for i = 1:nPatches;
     subplot(m, m, i)
-    show_patch(filtGrad{i});
+    imshow(uint8(renorm(filtGrad{i}, 0, 255)));
     title(sprintf('%.2f pi', rotation(i)/pi))
   end
 end

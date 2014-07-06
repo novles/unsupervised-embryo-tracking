@@ -1,6 +1,5 @@
 function gb=gabor_patch(sigma,theta,lambda,psi,gamma)
 % I stole this from wikipedia.  The explanation is a little funky on there.
-% Plot gabors easily with show_patch.m
 %
 % sigma = Standard deviation of the gaussian envelope.  The gabor patch has
 %         a support of three standard deviations on each side, so the image
