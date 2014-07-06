@@ -1,12 +1,15 @@
 % unsupervised-embyo-tracking
 
 % Magic numbers:
+% TODO: Find paper's values for gaborStd, gaborLambda
 nPatches = 16; % Number of rotated gabor patches in filter bank
+gaborStd = 3; % Standard deviation of gabor patches
+gaborLambda = 9; % Wavelength of gabor patch
 genFigures = true; % Draw debug figures;
 
 % Generate gabor patches.
 rotation =  0:pi/nPatches:pi-pi/nPatches;
-gaborPatch = @(r) gabor_patch(3, r, 3*pi, 0, 1);
+gaborPatch = @(r) gabor_patch(gaborStd, r, gaborLambda, 0, 1);
 gabor = arrayfun(gaborPatch, rotation, 'UniformOutput', false);
 
 % If debugging, show gabor patches
@@ -25,9 +28,9 @@ end
 image = double(imread('Frame001.png'));
 grad = gradient(image);
 
-% Convolve gradient with gabor filters.
-conv2fun = @(gb) conv2(grad, gb, 'same');
-filtGrad = cellfun(conv2fun, gabor, 'UniformOutput', false);
+% correlate gabor filters with gradient/
+filtfun = @(gb) abs(filter2(gb, grad));
+filtGrad = cellfun(filtfun, gabor, 'UniformOutput', false);
 
 % If debugging, show result of convolution
 if genFigures
