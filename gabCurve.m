@@ -16,7 +16,7 @@ function out = gabCurve(stdDev,curveAngle,lambda,psi, radius, arcAngle, gamma, c
     xGab = size(gab_,2);
     yGab = size(gab_,1);
     gabMax = max(xGab,yGab);
-    gabSize = [xGab yGab]
+    gabSize = [xGab yGab];
     
     %gab_ = imresize(padarray(gab__, gabPad, 'replicate'),kernScale);
     kernSize = ceil([radius radius]*2*kernScale + [gabMax gabMax]);

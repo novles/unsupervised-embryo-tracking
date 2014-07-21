@@ -37,7 +37,7 @@ end
 
 % Load one image for now.
 % TODO: Load all the images
-image = double(imread('Proj\MouEmbTrkDtb\E00\Frame001.png'));
+image = double(imread('MouEmbTrkDtb\E00\Frame001.png'));
 
 
 %grad = gradient((image));

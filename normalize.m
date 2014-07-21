@@ -7,9 +7,23 @@ function y = normalize(x, uBound, lBound)
         case 2
             lBound = 0;
     end
-
-    xMin = min(x(:));
-    xMax = max(x(:));
+    
+    
+    xSize = size(x,2);
+    ySize = size(x,1);
+    
+    x_ = zeros(size(x));
+    
+    for i = 1:ySize
+       for j = 1:xSize 
+           if abs(x(i,j)) ~= inf
+               x_(i,j) = x(i,j);
+           end
+       end
+    end
+    
+    xMin = min(x_(:));
+    xMax = max(x_(:));
     
     scaleFactor = 1/(xMax - xMin);
 

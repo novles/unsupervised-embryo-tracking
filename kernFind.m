@@ -1,17 +1,6 @@
-% function loc = cellCentre(inputImage, radius)
-
-if true
+function loc = kernFind(kern, in)
     
-    startRad = 100;
-    cellLevel = 2;
-    rad = startRad*nthroot((2^cellLevel),3)
-    
-    kern = gabCurve(gaborStd, 0, gaborLambda, 0, 1, rad, 195);
-    
-    xSize = size(result,2);
-    ySize = size(result,1);
-
-    xCorr = normxcorr2(kern,result);
+    xCorr = normxcorr2(kern,in);
     [maxVal, index] = max(xCorr(:));
 
     [yPeak, xPeak] = ind2sub(size(xCorr),index(1));
@@ -20,9 +9,11 @@ if true
     yOffset = yPeak - size(kern,1)/2 + 1;
 
     figure;
-    imshow(normalize(result));
+    imshow(normalize(in));
     hold on;
     plot(xOffset, yOffset,'o','MarkerSize',10);
+    hold off;
+    loc = [xOffset yOffset maxVal];
 
 end
 
