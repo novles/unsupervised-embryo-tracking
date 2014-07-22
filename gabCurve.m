@@ -13,12 +13,15 @@ function out = gabCurve(stdDev,curveAngle,lambda,psi, radius, arcAngle, gamma, c
     kernScale = 4; % Magic number. This is here so the circle is smoother
 
     gab_ = gabor_patch(stdDev*kernScale, 0, lambda*kernScale, psi , gamma);
+    gabMaxVal = max(gab_(:));
+    gabMinVal = min(gab_(:));
     xGab = size(gab_,2);
     yGab = size(gab_,1);
     gabMax = max(xGab,yGab);
     gabSize = [xGab yGab];
     
     %gab_ = imresize(padarray(gab__, gabPad, 'replicate'),kernScale);
+    %kernSize = ceil(ceil([radius radius]/2)*4*kernScale + [gabMax gabMax]); %Done so the image comes out even number. Symmetry!
     kernSize = ceil([radius radius]*2*kernScale + [gabMax gabMax]);
 
     numThreads = 32; % Magic~~
@@ -76,6 +79,6 @@ function out = gabCurve(stdDev,curveAngle,lambda,psi, radius, arcAngle, gamma, c
     yMin = min( radius*kernScale*(sin(arcAngles)+1) - abs(xGab*sin(arcAngles))/2 + 1);
     yMax = max( radius*kernScale*(sin(arcAngles)+1) + abs(xGab*sin(arcAngles)) + 1);
     cropBox = floor([[xMin+1 yMin+1] ([xMax yMax]-[xMin yMin])]);
-
-    out = imresize(imcrop(kern_,cropBox), 1/kernScale);
+    out = normalize(imresize(imcrop(kern_,cropBox),1/kernScale),gabMaxVal,gabMinVal);
+    %out = imresize(imcrop(kern_,cropBox), 1/kernScale);
 end

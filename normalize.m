@@ -12,7 +12,7 @@ function y = normalize(x, uBound, lBound)
     xSize = size(x,2);
     ySize = size(x,1);
     
-    x_ = zeros(size(x));
+    x_ = zeros([size(x,2) size(x,1)]);
     
     for i = 1:ySize
        for j = 1:xSize 
@@ -25,9 +25,9 @@ function y = normalize(x, uBound, lBound)
     xMin = min(x_(:));
     xMax = max(x_(:));
     
-    scaleFactor = 1/(xMax - xMin);
+    scaleFactor = abs(1/(xMax - xMin));
 
-    y = (((x-xMin)*(uBound-lBound)*scaleFactor) - (uBound-lBound)/2) + (uBound+lBound)/2;
+    y = (x-(xMin+xMax)/2).*abs(uBound-lBound)*scaleFactor + (lBound + uBound)/2;
     
 %    y = (x-min(x(:))) ./ (max(x(:)-min(x(:))));
 end
