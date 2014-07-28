@@ -3,14 +3,14 @@
 % the image.
 
 
-function out = imLP( in, Cutoff ) 
+function out = imLP( in, cutoff ) 
     
     
     imSize = [size(in,1) size(in,2)];
 
-    if Cutoff >= min(imSize)
+    if cutoff >= min(imSize)
         cutoff = ceil(min(imSize)/2)-1;
-
+    end
     
     filt = zeros(imSize(1),imSize(2));
     

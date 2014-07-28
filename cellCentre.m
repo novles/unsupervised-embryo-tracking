@@ -1,30 +1,42 @@
-% function loc = cellCentre(inputImage, radius)
+% takes an image and a guess at where the circle is, spits out a better
+% guess. I guess.
 
-if true
+function [rad x y] = cellCentre(in, x, y)
     
-    startRad = 100;
-    cellLevel = 2;
-    rad = startRad*nthroot((2^cellLevel),3)
+    cellCentre = [firstEst(3) firstEst(4)];
+    cellTopC = cellCentre-floor(sizeEst/2);
+
+
+    search = cell(1,2);
+
+    botY = floor(size(searchArea,1)/2);
+    topY = ceil(size(searchArea,1)/2);
+    search{1} = searchArea(1:botY,:);
+    search{2} = searchArea(topY+1:end,:);
+
+    circleX = 0;
+    circleY = 0;
+
+    for i = 0:1
+
+        index = i+1;
+        kern = gabor_patch(gaborStd, i*pi/2+pi/4, gaborLambda, 0, .1,64).^2; % Approximates a straight bit
+
+        y =  kernFind(kern,in);
+
+        circleX(index) = y(2);
+        circleY(index) = y(1);
+
+    end
     
-    kern = gabCurve(gaborStd, 0, gaborLambda, 0, 1, rad, 195);
+
+    [rad opp adj] = findRadius(circleX(1),circleX(1),circleY(1),circleY(1),pi/2);
     
-    xSize = size(result,2);
-    ySize = size(result,1);
-
-    xCorr = normxcorr2(kern,result);
-    [maxVal, index] = max(xCorr(:));
-
-    [yPeak, xPeak] = ind2sub(size(xCorr),index(1));
-
-    xOffset = xPeak - size(kern,2)/2 + 1;
-    yOffset = yPeak - size(kern,1)/2 + 1;
-
-    figure;
-    imshow(normalize(result));
-    hold on;
-    plot(xOffset, yOffset,'o','MarkerSize',10);
-
+    
+    
 end
+
+
 
 
 

@@ -1,123 +1,157 @@
 %function out = cellFind(in)
 
-    in = double(imread('MouEmbTrkDtb\E23\Frame001.png'));
+    
+
+    in = double(imread('MouEmbTrkDtb\E03\Frame001.png'));
     
     imSize = size(in);
     
     lpCutoff = 100;
-    hpCutoff = 30;
+    hpCutoff = 1;
     
-%     imLP = zeros(size(in));
-%     imHP = zeros(size(in));
+
+    imFilt = lpGen(lpCutoff,imSize(2),imSize(1)).*hpGen(hpCutoff,imSize(2),imSize(1));
+    
+    imageFFT = ((imFilt).*fftshift(fft2(in)));
+
+    imageFiltered = abs(ifft2(imageFFT))-in;% - abs((ifft2(imageFFT)));
+    
+%     imageMedFilt = medfilt2(imageFiltered,[10 10]);
+%     image = imageMedFilt;
 %     
-%     imLP((imSize(1)-lpCutoff)/2+1:(imSize(1)+lpCutoff)/2,(imSize(1)-lpCutoff)/2+1:(imSize(1)+lpCutoff)/2) = ones(lpCutoff,lpCutoff);
-%     imHP((imSize(1)-hpCutoff)/2+1:(imSize(1)+hpCutoff)/2,(imSize(1)-hpCutoff)/2+1:(imSize(1)+hpCutoff)/2) = ones(hpCutoff,hpCutoff);
-    imLP = zeros(size(in));
-    imHP = zeros(size(in));
-    
-    imLP((imSize(1)-lpCutoff*2)/2+1:(imSize(1)+lpCutoff*2)/2,(imSize(1)-lpCutoff*2)/2+1:(imSize(1)+lpCutoff*2)/2) = imresize(fspecial('disk',lpCutoff),(lpCutoff*2)/(lpCutoff*2+1));
-    imHP((imSize(1)-hpCutoff*2)/2+1:(imSize(1)+hpCutoff*2)/2,(imSize(1)-hpCutoff*2)/2+1:(imSize(1)+hpCutoff*2)/2) = imresize(fspecial('disk',hpCutoff),(hpCutoff*2)/(hpCutoff*2+1));
-    
-    imHP = im2bw(normalize(imHP),.1);
-    imLP = im2bw(normalize(imLP),.1);
-    
-    imFilt = (1-(imHP)).*(imLP);
-    
-    imageFFT = (fftshift(imFilt).*fft2(in));
+    imageLP = abs(ifft2(lpGen(5,imSize(2),imSize(1)).*fftshift(fft2(in))));
 
-    image = in;% - abs((ifft2(imageFFT)));
+%     kern = fspecial('disk',50);
+% %  
     
-    image = medfilt2(image,[10 10]);
+     kern = gabCurve(40,0,200,0,50,2*pi,1);
+     sizeEst = size(kern);
+% %     
+     firstEst = kernFind(kern,imageLP);
+%     
+     grad = abs(gradient(medfilt2(imageFiltered,[20 20]))); %Applying the logarithm gives better response for the gab filters.
     
-    grad = (gradient((image))); %Applying the logarithm gives better response for the gab filters.
     
-    %figure,imshow(normalize(image));
+        
     
-    %preprocess (I pulled out your code, Jason.)
-    
-    nPatches = 8; % Number of rotated gabor patches in filter bank
-    gaborStd = 6; % Standard deviation of gabor patches
-    gaborLambda = gaborStd*pi; % Wavelength of gabor patch
-    gaborAspect = 10;
+%     figure(1);
+%     hold on;
+%     subplot(1,3,1);
+%     imshow(normalize(in));
+%     
+%     
+%     figure(1);
+%     hold on;
+%     subplot(1,3,2);
+%     imshow(normalize(imFilt));
+%     
+%     figure(1);
+%     hold on;
+%     subplot(1,3,3);
+%     imshow(normalize(imageFiltered));
+%     
+%     figure(2);
+%     hold on;
+%     subplot(1,2,1);
+%     imshow(normalize(image));
+%     
+%     figure(2);
+%     hold on;
+%     subplot(1,2,2);
+%     imshow(normalize(grad));
+      
+%     %figure,imshow(normalize(image));
+%     
+%     %preprocess (I pulled out your code, Jason.)
+%     
+    nPatches = 32; % Number of rotated gabor patches in filter bank
+    gaborStd = 2*pi; % Standard deviation of gabor patches
+    gaborLambda = gaborStd*2; % Wavelength of gabor patch
+    gaborAspect = .5;
 
     
-    gabSize = max(size(gabor_patch(gaborStd, 0, gaborLambda/2, 0, gaborAspect)));
+    
+    gabSize = max(size(gabor_patch(gaborStd, 0, gaborLambda, 0, gaborAspect)));
     
     rotation =  0:pi/nPatches:pi-pi/nPatches;
-    gaborPatch = @(r) (gabor_patch(gaborStd, r, gaborLambda, 0, gaborAspect, size(image,2), size(image,1)));
-    gabor = arrayfun(gaborPatch, rotation, 'UniformOutput', false);
     
-%     filtfun = @(gb) power(abs(fft2(gb)))),1); % Squaring it gives better contrast against the garbage noise.
-%     gabPatch = 
-%     
-    %Convolve in frequency domain. Much faster.
-    filtfun = @(gb) power(abs(ifftshift(ifft2(fft2(gb).*fft2(grad)))),1); % Squaring it gives better contrast against the garbage noise.
-    filtGrad = cellfun(filtfun, gabor, 'UniformOutput', false);
-    
-    
-    result = 0;
+    gabFilt = 0;
     
     for i = 1:nPatches
-        result = result + filtGrad{i}; % The cell edge should now be clearly visible.
+        gabFilt = gabFilt + fft2(gabor_patch(gaborStd, (i-1)*pi/nPatches, gaborLambda, 0, gaborAspect, size(image,2), size(image,1)));
+    end
+    
+    result_ = gabFilt.*fft2(grad);
+    result = abs(ifftshift(ifft2(result_)));
+   
+    
+    cellCentre = [firstEst(3) firstEst(4)];
+    cellTopC = cellCentre-floor(sizeEst/2);
+    
+    searchArea = imcrop(result,[cellTopC sizeEst]);
+    search = cell(1,2);
+    
+    botY = floor(size(searchArea,1)/2);
+    topY = ceil(size(searchArea,1)/2);
+    search{1} = searchArea(1:botY,:);
+    search{2} = searchArea(topY+1:end,:);
+    
+%     x = gabEllipse(gaborStd, gaborLambda/2, 0,.5,50,50);
+    circleX = 0;
+    circleY = 0;
+        
+     for i = 0:1
+         
+         index = i+1;
+         kern = gabor_patch(gaborStd, i*pi/2+pi/4, gaborLambda, 0, .1,64).^2;
+
+         y =  kernFind(kern,search{1});
+         
+         circleX(index) = y(2);
+         circleY(index) = y(1);
+       
+     end
+     
+     
+     
+     centre = [min(circleX)+(dist/2) min(circleY)+adj]+cellTopC;
+     
+     searchBox = floor([centre-2*radius [radius radius]*4]);
+     
+     
+     
+     embryoCrop = imCrop(result,searchBox);
+     
+     embryoWindow = lpGen(150,size(embryoCrop,2),size(embryoCrop,1));
+     embryo = embryoCrop.*embryoWindow;
+     
+     
+     
+     test = gabEllipseFind(embryo,size(embryoCrop,2)/2,size(embryoCrop,1)/2, gaborStd,gaborLambda/sqrt(2), .1, radius);
+     
+    figure(1)
+    for i = 1:16
+        hold on;
+        subplot(4,4,i);
+        imshow(normalize(test{i,3}));
     end
 
-    %figure(1);
-    %imshow(normalize(result));
     
     
-    
-    % Because the result is squared, the gabor wavelength is halved.
-   
-    running = true;
-    
-    i = 0;
-    
-    %while running == true
-        
-        [maxVal, index] = max(result);
+    figure(2)
+    imshow(normalize(embryo));
+    for i = 1:16
+        hold on;
+%         subplot(4,4,i);
+%         imshow();
 
-        [yPeak, xPeak] = ind2sub(size(result),index(1));
-
-     %   if
-    %end
+        plot(test{i,1}(2),test{i,1}(1),'ro');
+    end
     
-    
-    
-    %Find first edge by 
-%     while running == true && i ~= nPatches-1 
-%         
-%         angle = pi*(i/nPatches);
-%         
-%         gab = gabor_patch(gaborStd, angle, gaborLambda/2, 0, gaborAspect, size(image,2), size(image,1));
-%         
-%         loc = kernFind(gab,result)
-%         
-%         i = i+1;
-%         
-%     end
-%     
-    
-    
-    
+    plot(test{1,1}(2),test{1,1}(1));
+     
 %     
 %     
 %     
-%     locBefore = kernFind(gabBefore,result);
-%     locAfter = kernFind(gabAfter,result);
-    
-    
-% for i = 1:2
 %     
-%     switch i
-%         case 1
-%             rUp = 
-%         case 2
-%             
-%     end
-% end
-% 
-% 
 %     
-    
-   
-%end

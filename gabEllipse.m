@@ -13,16 +13,13 @@ function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, angle)
     kernScale = 4; % Magic number. This is here so the circle is smoother
 
     gab_ = gabor_patch(stdDev*kernScale, 0, lambda*kernScale, psi, gamma);
-    xGab = size(gab_,2)
-    yGab = size(gab_,1)
+    xGab = size(gab_,2);
+    yGab = size(gab_,1);
     gabMax = max(xGab,yGab);
     gabMin = max(xGab,yGab);
     kernMax = max(yRad, xRad);
     
-    
-    
     kernSize = ceil([kernMax kernMax]*2*kernScale + [gabMax gabMax]) ;
-    
     
     numThreads = 32; % Magic~~
     iterations = ceil(max(xRad, yRad)*kernScale*(2*pi)/2);

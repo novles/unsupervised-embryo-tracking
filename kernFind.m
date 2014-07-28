@@ -13,7 +13,7 @@ function loc = kernFind(kern, in)
 %     hold on;
 %     plot(xOffset, yOffset,'o','MarkerSize',10);
 %     hold off;
-    loc = [xOffset yOffset maxVal];
+    loc = [yOffset xOffset];
 
 end
 
