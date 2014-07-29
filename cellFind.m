@@ -70,8 +70,8 @@
     gaborAspect = .5;
 
     
-    
-    gabSize = max(size(gabor_patch(gaborStd, 0, gaborLambda, 0, gaborAspect)));
+    gab
+    Size = max(size(gabor_patch(gaborStd, 0, gaborLambda, 0, gaborAspect)));
     
     rotation =  0:pi/nPatches:pi-pi/nPatches;
     
@@ -82,10 +82,10 @@
     end
     
     result_ = gabFilt.*fft2(grad);
-    result = abs(ifftshift(ifft2(result_)));
+    result = nthroot(normalize((ifftshift(ifft2(result_))).^2),2);
    
     
-    cellCentre = [firstEst(3) firstEst(4)];
+    cellCentre = [firstEst(1) firstEst(2)];
     cellTopC = cellCentre-floor(sizeEst/2);
     
     searchArea = imcrop(result,[cellTopC sizeEst]);
@@ -127,19 +127,29 @@
      
      
      
-     test = gabEllipseFind(embryo,size(embryoCrop,2)/2,size(embryoCrop,1)/2, gaborStd,gaborLambda/sqrt(2), .1, radius);
+     test = gabEllipseFind(embryo,size(embryoCrop,2)/2,size(embryoCrop,1)/2, gaborStd,gaborLambda*sqrt(2), .5,nPatches, radius);
      
-    figure(1)
-    for i = 1:16
-        hold on;
-        subplot(4,4,i);
-        imshow(normalize(test{i,3}));
+    for i = 1:4:16
+        
+        figure(2*i-1)
+         imshow(normalize(abs(ifft2((test{i,2})))))
+        
+%         surf(filter2(fspecial('gaussian',[3 7],5),unwrap(unwrap(fftshift(angle(test{i,5})),[],2),[],1))),shading flat;
+%         
+        figure(2*i)
+        imshow(normalize(test{i,3})),shading flat;
+        
+%         figure(4*i-1)
+%         
+%         imshow(test{i,1});
+%         figure(4*i)
+%         imshow(test{i,3});
     end
 
     
     
     figure(2)
-    imshow(normalize(embryo));
+    %imshow(normalize(embryo));
     for i = 1:16
         hold on;
 %         subplot(4,4,i);
