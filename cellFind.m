@@ -28,10 +28,12 @@
      sizeEst = [300 300]; % 'cause most of 'em are radius 100, this should do
 % %     
      firstEst = kernFind(kern,imageLP);
-%     
-     grad = abs(gradient(medfilt2(imageFiltered,[20 20]))); %Applying the logarithm gives better response for the gab filters.
-    
-    
+     medianFilt = medfilt2(imageFiltered,[20 20])
+     grad = abs(gradient(medianFilt)); %Applying the logarithm gives better response for the gab filters.
+    figure(1);
+    imshow(imageLP);
+    hold on
+    plot(firstEst(2),firstEst(1),'ro')
         
     
 %     figure(1);s
@@ -76,8 +78,16 @@
     
     gabFilt = 0;
     
+    figure(1);
+    
     for i = 1:nPatches
-        gabFilt = gabFilt + fft2(gabor_patch(gaborStd, (i-1)*pi/nPatches, gaborLambda, 0, gaborAspect, size(grad,2), size(grad,1)));
+        
+        gabbaba = gabor_patch(gaborStd, (i-1)*pi/nPatches, gaborLambda, 0, gaborAspect, 32,32);
+        
+        hold on;
+        subplot(ceil(sqrt(nPatches)),ceil(sqrt(nPatches)),i);
+        imshow(normalize(gabbaba));
+%         gabFilt = gabFilt + fft2(gabbaba);
     end
     
     LPConst = 3;
@@ -135,90 +145,90 @@
 %      
       centre = [  min(circleX)+(dist/2) min(circleY)+adj]+cellTopC;
 %      
-    imshow(normalize(result)*40);
-    hold on
-    plot(circleX(1)+cellTopC(1),circleY(1)+cellTopC(2),'go');
-    plot(circleX(2)+cellTopC(1),circleY(2)+cellTopC(2),'go');
-    plot(centre(1), centre(2),'ro');
-    hold off
+%     imshow(normalize(result)*40);
+%     hold on
+%     plot(circleX(1)+cellTopC(1),circleY(1)+cellTopC(2),'go');
+%     plot(circleX(2)+cellTopC(1),circleY(2)+cellTopC(2),'go');
+%     plot(centre(1), centre(2),'ro');
+%     hold off
+% %      
 %      
-     
-     searchBox = floor([centre-2*radius [radius radius]*4]);
-     
-     embryo = imcrop(result,searchBox);
-     
-%      embryoCrop = imcrop(result,searchBox);
+%      searchBox = floor([centre-2*radius [radius radius]*4]);
 %      
-%      embryoWindow = lpGen(150,size(embryoCrop,2),size(embryoCrop,1));
-%      embryo = embryoCrop.*embryoWindow;
-     
-     
-    
-     
-
-     test = gabEllipseFind(embryo,size(embryo,2)/2,size(embryo,1)/2, gaborStd,gaborLambda, 5,nPatches*4, radius);
-    
-    
-%     close all
-%     w = 1;
-%     X = 0;
-%     Y = 0;
-%     Z = 0;
+%      embryo = imcrop(result,searchBox);
+%      
+% %      embryoCrop = imcrop(result,searchBox);
+% %      
+% %      embryoWindow = lpGen(150,size(embryoCrop,2),size(embryoCrop,1));
+% %      embryo = embryoCrop.*embryoWindow;
+%      
+%      
 %     
-%     
-%     
-%     for i = 1:size(test{1,1},1)
-%             
-%         for j = 1:size(test{1,1},1)
-%             X(w) = i;
-%             Y(w) = j;
-%             Z(w) = test{1,1}(i,j);
-%             w = w+1;
-%         end
-%     end
-%     
-%     X = X';
-%     Y = Y';
-%     Z = Z';
-%     close all
-%     for i = 1:16
-%         
-% %         figure(2*i-1)
-% % %         imshow(normalize(abs(ifft2((test{i,2})))))
-% %         
-% %        
-%          figure(i)
-%          x = unwrap(unwrap(test{i,1},[],2),[],1);
-%          
-%          s = 4;
-%          
-%          surf(x(s+1:end-s,s+1:end-s)),shading flat;
-% %          surf(test{i,1}),view(2),shading flat;
-% %        imshow(normalize(angle(test{i,5}))),shading flat;
-% %         surf(unwrap(unwrap(fftshift(angle(test{i,5})),[],1),[],2))),shading flat;
-% %         surf(filter2(fspecial('gaussian',[7 7],5),unwrap(unwrap(fftshift(angle(test{i,5})),[],2),[],1))),shading flat;
-% % %        
-% %         
-% %         imshow(normalize(test{i,4}));
-% %         figure(4*i)
-% %         imshow(test{i,3});
-%     end
-
-    
-%     figure(17)
-%     %imshow(normalize(embryo));
-%     for i = 1:16
-%         hold on;
-%         subplot(4,4,i);
-% %         imshow();
+%      
 % 
-%         imshow(normalize(test{i,5}));
-%     end
-%     
-%     plot(test{1,1}(2),test{1,1}(1));
-     
+%      test = gabEllipseFind(embryo,size(embryo,2)/2,size(embryo,1)/2, gaborStd,gaborLambda, 5,nPatches*4, radius);
 %     
 %     
+% %     close all
+% %     w = 1;
+% %     X = 0;
+% %     Y = 0;
+% %     Z = 0;
+% %     
+% %     
+% %     
+% %     for i = 1:size(test{1,1},1)
+% %             
+% %         for j = 1:size(test{1,1},1)
+% %             X(w) = i;
+% %             Y(w) = j;
+% %             Z(w) = test{1,1}(i,j);
+% %             w = w+1;
+% %         end
+% %     end
+% %     
+% %     X = X';
+% %     Y = Y';
+% %     Z = Z';
+% %     close all
+% %     for i = 1:16
+% %         
+% % %         figure(2*i-1)
+% % % %         imshow(normalize(abs(ifft2((test{i,2})))))
+% % %         
+% % %        
+% %          figure(i)
+% %          x = unwrap(unwrap(test{i,1},[],2),[],1);
+% %          
+% %          s = 4;
+% %          
+% %          surf(x(s+1:end-s,s+1:end-s)),shading flat;
+% % %          surf(test{i,1}),view(2),shading flat;
+% % %        imshow(normalize(angle(test{i,5}))),shading flat;
+% % %         surf(unwrap(unwrap(fftshift(angle(test{i,5})),[],1),[],2))),shading flat;
+% % %         surf(filter2(fspecial('gaussian',[7 7],5),unwrap(unwrap(fftshift(angle(test{i,5})),[],2),[],1))),shading flat;
+% % % %        
+% % %         
+% % %         imshow(normalize(test{i,4}));
+% % %         figure(4*i)
+% % %         imshow(test{i,3});
+% %     end
+% 
 %     
-%     
-%     
+% %     figure(17)
+% %     %imshow(normalize(embryo));
+% %     for i = 1:16
+% %         hold on;
+% %         subplot(4,4,i);
+% % %         imshow();
+% % 
+% %         imshow(normalize(test{i,5}));
+% %     end
+% %     
+% %     plot(test{1,1}(2),test{1,1}(1));
+%      
+% %     
+% %     
+% %     
+% %     
+% %     
