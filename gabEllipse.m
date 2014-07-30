@@ -1,16 +1,16 @@
-function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, angle)
+function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, phi)
 
 
     switch nargin
         case 6
-            angle = 0;
+            phi = 0;
     end
 
     
     gamma = min(gamma,5); %'cause past 5 it starts looking weird.
     
     
-    kernScale = 4; % Magic number. This is here so the circle is smoother
+    kernScale = 1; % Magic number. This is here so the circle is smoother
 
     gab_ = gabor_patch(stdDev*kernScale, 0, lambda*kernScale, psi, gamma);
     xGab = size(gab_,2);
@@ -26,7 +26,8 @@ function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, angle)
     
     xPos_ = zeros(1,iterations);
     yPos_ = zeros(1,iterations);
-
+    figure(1);
+        hold on
     for i = 1:ceil(iterations)
 
         ellipseAngle = (2*pi)*( (i/iterations) - 0.5 );
@@ -35,10 +36,12 @@ function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, angle)
         yPos__ = kernScale*yRad*sin(ellipseAngle);
 
         r = nthroot((xPos__^2 + yPos__^2),2);
-        theta = atan2(yPos__,xPos__)+angle;
+        theta = atan2(yPos__,xPos__)+phi;
 
         xPos_(i) = r*cos(theta);
         yPos_(i) = r*sin(theta);
+        
+        
 
     end
     
@@ -57,8 +60,8 @@ function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, angle)
             nTheta = atan2(yLine, xLine)+pi/2; 
             gab = gabor_patch(stdDev*kernScale, nTheta, lambda*kernScale, psi , gamma, gabMax);
         
-            xPos = floor(xPos_(i))+kernMax*kernScale + 1;% + xGab
-            yPos = floor(yPos_(i))+kernMax*kernScale + 1;% + yGab
+            xPos = round(xPos_(i)+kernMax*kernScale) + 1;% + xGab
+            yPos = round(yPos_(i)+kernMax*kernScale) + 1;% + yGab
             
             kern__{j}(yPos:(yPos+gabMax-1),xPos:(xPos+gabMax-1)) = kern__{j}(yPos:(yPos+gabMax-1),xPos:(xPos+gabMax-1)) + gab;
 
@@ -93,8 +96,8 @@ function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, angle)
     
     centre = kernMax*kernScale+xGab;
     
-    xOffset = (kernScale*((xRad-yRad)*(2*cos(angle)^2 - 1))+((xRad+yRad)*kernScale+2*xGab))/2;
-    yOffset = (kernScale*((xRad-yRad)*(2*sin(angle)^2 - 1))+((xRad+yRad)*kernScale+2*xGab))/2;
+    xOffset = (kernScale*((xRad-yRad)*(2*cos(phi)^2 - 1))+((xRad+yRad)*kernScale+2*xGab))/2;
+    yOffset = (kernScale*((xRad-yRad)*(2*sin(phi)^2 - 1))+((xRad+yRad)*kernScale+2*xGab))/2;
     
     xMin = floor(centre-xOffset);
     xMax = floor(centre+xOffset);

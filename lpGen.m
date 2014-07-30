@@ -19,6 +19,6 @@ function out = lpGen(cutoff, m, n)
     
     filt = padarray(disk, ceil((imPad-size(disk))/2), 0, 'both');
     
-    out = filt./mode(disk(:));
+    out = filt;
 
 end
