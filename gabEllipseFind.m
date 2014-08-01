@@ -1,16 +1,16 @@
 % This function takes a current ellipse and returns difference information.
 
 
-function out = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches, xRad, yRad, phi)
+function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches, majRad, minRad, phi)
 
     
     switch nargin
         case 7
             patches = 32; %More magic!!
-            yRad = xRad;
+            minRad = majRad;
             phi = 0;
         case 8
-            yRad = xRad;
+            minRad = majRad;
             phi = 0;
         case 9
             phi = 0;
@@ -25,21 +25,21 @@ function out = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches
     
     iterations = patches*2;
     
-    radius = (xRad+yRad)/2;
+    radius = (majRad+minRad)/2;
     
     fudge = 1.1;
     
     upscale = 1; % Magic number. frequency domain, man s'legit.
-    
-    gabMax = floor(min(max(xGab,yGab)*2,128));
+    gabMax = 96;
+% %     gabMax = floor(min(max(xGab,yGab)*2,128));
 %     gabMin = max(xGab,yGab);
-%     kernMax = max(yRad, xRad);
+%     kernMax = max(minRad, majRad);
 %     
      
 %    inSize = ceil([kernMax kernMax]*2 + [gabMax gabMax]) ;
 %     
 
-    ellipse_ = gabEllipse(stdDev,lambda,0, gamma, xRad, yRad, phi);
+    ellipse_ = gabEllipse(stdDev,lambda,0, gamma, majRad, minRad, phi);
     
     
     ellipse_ = padarray(ellipse_,[gabMax gabMax],0,'both').^2;
@@ -53,8 +53,8 @@ function out = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches
 
         ellipseAngle = (2*pi)*( (i/iterations) - 0.25 );
 
-        xPos__ = xRad*cos(ellipseAngle);
-        yPos__ = yRad*sin(ellipseAngle);
+        xPos__ = majRad*cos(ellipseAngle);
+        yPos__ = minRad*sin(ellipseAngle);
 
         r = nthroot((xPos__^2 + yPos__^2),2);
         theta = atan2(yPos__,xPos__)+phi;
@@ -90,13 +90,11 @@ function out = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches
         xPos = floor(xPos_(i)+floor(size(ellipse_,2)/2)*upscale) + 1;% + xGab
         yPos = floor(yPos_(i)+floor(size(ellipse_,1)/2)*upscale) + 1;% + yGab
 
-         xPos = xPos - floor(gabMax/2);
-         yPos = yPos - floor(gabMax/2);
-%         
-        
+        xPos = xPos - floor(gabMax/2);
+        yPos = yPos - floor(gabMax/2);
+
         gab{i} = ellipse_(yPos:(yPos+gabMax-1),xPos:(xPos+gabMax-1));
-        
-        
+
     end
    
     
@@ -128,15 +126,15 @@ function out = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches
         crop = inScaled(yPos:yMax,xPos:xMax);
         
         est = kernFind(gab{i}, crop);
-        figure(1),hold on;
-        subplot(ceil(sqrt(iterations)),ceil(sqrt(iterations)),i);
-        imshow(normalize(gab{i}));
-        figure(2),hold on
-        subplot(ceil(sqrt(iterations)),ceil(sqrt(iterations)),i)
-        imshow(normalize(crop));
-        hold on
-        plot(est(2),est(1),'ro');
-        plot(gabMax/2+add,gabMax/2+add,'go');
+%         figure(1),hold on;
+%         subplot(ceil(sqrt(iterations)),ceil(sqrt(iterations)),i);
+%         imshow(normalize(gab{i}));
+%         figure(2),hold on
+%         subplot(ceil(sqrt(iterations)),ceil(sqrt(iterations)),i)
+%         imshow(normalize(crop));
+%         hold on
+%         plot(est(2),est(1),'ro');
+%         plot(gabMax/2+add,gabMax/2+add,'go');
         est = floor((est + [yPos xPos]));
        
         edgeLocEst(curr,:) = [est(1) est(2)];
@@ -233,20 +231,33 @@ function out = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches
 %     
 %     out = [major minor maTheta miTheta];
 
-    for i = 0:iterations-1
-       
+    for i = 0:floor((iterations-1)/2)
+
         indexOpp = mod(i-floor((iterations/2)),iterations)+1;
-        index = i+1
-        rad = findRadius(edgeLocEst(index,2), edgeLocEst(index,1), edgeLocEst(indexOpp,2), edgeLocEst(indexOpp,1), pi);
+        index = i+1;
+        point1 =  [edgeLocEst(index,1), edgeLocEst(index,2)];
+        point2 =  [edgeLocEst(indexOpp,1), edgeLocEst(indexOpp,2)];
+
+        cent(index,:) = (point1+point2)/2;
+
+        rad(index) = findRadius(point1(2),point1(1),point2(2),point2(1), pi);
         
-        edgeLocEst(index,3) = rad
         
+
+        %         edgeLocEst(index,3) = rad;
+
     end
 
+    [majorRad maxInd] = max(rad);
+    [minorRad minInd] = min(rad);
+    
+    phi = pi*((maxInd)+(minInd-(iterations/4)))/iterations;
+    
+    centre = round(mean(cent))-pad;
     
     
-    result = edgeLocEst
+%     
+     result = edgeLocEst;
     
-    out = result;
   
 end
