@@ -1,4 +1,4 @@
-function out = hpGen(cutoff, dimX, dimY)
+function out = hpGen(cutoff, m, n)
 
     switch nargin
         case 1
@@ -8,6 +8,6 @@ function out = hpGen(cutoff, dimX, dimY)
             dimY = dimX;
     end
     
-    out = 1-lpGen(cutoff, dimX, dimY);
+    out = 1-lpGen(cutoff, m, n);
 
 end

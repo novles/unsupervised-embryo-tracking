@@ -1,7 +1,7 @@
 % This function takes a current ellipse and returns difference information.
 
 
-function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches, majRad, minRad, phi)
+function [centre, majorRad, minorRad, phi, cropBox] = gabEllipseFind(in, xCentre,yCentre, stdDev,lambda, gamma, patches, majRad, minRad, phi, cropPad)
 
     
     switch nargin
@@ -9,11 +9,16 @@ function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, st
             patches = 32; %More magic!!
             minRad = majRad;
             phi = 0;
+            cropPad = 0;
         case 8
             minRad = majRad;
             phi = 0;
+            cropPad = 0.5;
         case 9
             phi = 0;
+            cropPad = 0.5;
+        case 10;
+            cropPad = 0.5;
     end
     
 
@@ -30,7 +35,7 @@ function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, st
     fudge = 1.1;
     
     upscale = 1; % Magic number. frequency domain, man s'legit.
-    gabMax = 96;
+    gabMax = 128;
 % %     gabMax = floor(min(max(xGab,yGab)*2,128));
 %     gabMin = max(xGab,yGab);
 %     kernMax = max(minRad, majRad);
@@ -124,7 +129,10 @@ function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, st
         yMax = yMax - gabMax/2+add;
         
         crop = inScaled(yPos:yMax,xPos:xMax);
-        
+%         figure(1)
+%         imshow(normalize(gab{i}));
+%         figure(2)
+%         imshow(normalize(crop));
         est = kernFind(gab{i}, crop);
 %         figure(1),hold on;
 %         subplot(ceil(sqrt(iterations)),ceil(sqrt(iterations)),i);
@@ -241,13 +249,21 @@ function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, st
         cent(index,:) = (point1+point2)/2;
 
         rad(index) = findRadius(point1(2),point1(1),point2(2),point2(1), pi);
-        
-        
-
         %         edgeLocEst(index,3) = rad;
 
     end
+    
+    xMax = max(edgeLocEst(:,2))-pad;
+    xMin = min(edgeLocEst(:,2))-pad;
+    yMax = max(edgeLocEst(:,1))-pad;
+    yMin = min(edgeLocEst(:,1))-pad;
 
+    cropSize = [xMax-xMin yMax-yMin];
+    
+%     cropPad = 0.1;
+    
+    cropBox = [[xMin yMin]-cropSize*cropPad cropSize*(1+cropPad*2)];
+    
     [majorRad maxInd] = max(rad);
     [minorRad minInd] = min(rad);
     
@@ -255,9 +271,4 @@ function [centre majorRad minorRad phi] = gabEllipseFind(in, xCentre,yCentre, st
     
     centre = round(mean(cent))-pad;
     
-    
-%     
-     result = edgeLocEst;
-    
-  
 end

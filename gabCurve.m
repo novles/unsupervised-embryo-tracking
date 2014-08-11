@@ -28,7 +28,7 @@ function out = gabCurve(stdDev,curveAngle,lambda,psi, radius, arcAngle, gamma, c
     
     kern__ = cell(numThreads);
     
-    iterations = (radius*kernScale*arcAngle/2);
+    iterations = (2*radius*kernScale*arcAngle/2);
     
     
 
