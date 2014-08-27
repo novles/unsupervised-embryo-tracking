@@ -26,8 +26,7 @@ function out = gabEllipse(stdDev,lambda,psi, gamma, xRad, yRad, phi)
     
     xPos_ = zeros(1,iterations);
     yPos_ = zeros(1,iterations);
-    figure(1);
-        hold on
+    
     for i = 1:ceil(iterations)
 
         ellipseAngle = (2*pi)*( (i/iterations) - 0.5 );

@@ -84,6 +84,7 @@ function [centre, majorRad, minorRad, phi, cropBox] = gabEllipseFind(in, xCentre
     
     store = zeros(iterations,5);
     result = cell(iterations,5);
+    crop_ = cell(iterations,1);
     nTheta = 0;
     loc = [0 0];
     prevLoc = [0 0];
@@ -129,6 +130,7 @@ function [centre, majorRad, minorRad, phi, cropBox] = gabEllipseFind(in, xCentre
         yMax = yMax - gabMax/2+add;
         
         crop = inScaled(yPos:yMax,xPos:xMax);
+        crop_{i} = crop;
 %         figure(1)
 %         imshow(normalize(gab{i}));
 %         figure(2)

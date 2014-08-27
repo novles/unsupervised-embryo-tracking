@@ -3,10 +3,11 @@ folder = 'MouEmbTrkDtb\E01\';
 
 gabStd = 10;
 gabLam = gabStd*2;
-gabAsp = 10;
+gabAsp = 50;
 gabPhi = pi;
-nPatches = 16;
-mfSize = 20;
+nPatches = 64;
+mfSize = 5;
+mfMult = 4; % number of times to rotate. 1, 2 or 4 plx.
 lpCutoff = 100;
 hpCutoff = 20;
 flen = 10;
@@ -33,8 +34,6 @@ centre = out;
 rad = 85;
 imSize = size(in);
 
-
-
 gabFilt = makeGabFilt(gabStd, gabLam, gabAsp, nPatches, imSize(2), imSize(1), gabPhi);
 
 imFilt = lpGen(lpCutoff,imSize(2),imSize(1)).*hpGen(hpCutoff,imSize(2),imSize(1));
@@ -46,11 +45,16 @@ imageFiltered = abs(ifft2(imageFFT));% - abs((ifft2(imageFFT)));
 % medianFilt = medfilt2(imageFiltered,mfSize);
 
 x = imageFiltered;
+if mod(mfMult,4) == 0;
+    for i = 1:mfSize*mfMult
+    x = medfilt2(rot90(x,1),ceil([i i]/4));
+    end
+elseif mod(mfMult,4) == 1 || mod(mfMult,4) == 3
     
-for i = 1:mfSize
-    x = medfilt2(rot90(x,1),ceil([i i]/2));
+    for i = 1:mfSize*mfMult
+        x = medfilt2(x,ceil([i i])/mod(mfMult,4));
+    end
 end
-
 medianFilt = x;
 
 
